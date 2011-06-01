@@ -7,6 +7,6 @@ urlpatterns = patterns('',
 
     # static files 
     (r'^static/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': settings.BASE_DIR + 'static',
+        {'document_root': settings.BASE_DIR + '/' + 'static',
          'show_indexes': True}), 
 )
