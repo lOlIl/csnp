@@ -24,6 +24,9 @@ def json_list(valueset):
 
 ###
 
+def check_exp_time():
+    Paste.objects.filter(exp_time__lt = datetime.now()).delete()    
+
 def find_pastes(request):
     error_msg = u"No data sent."
     if request.method == "GET" and request.GET.has_key('find'):

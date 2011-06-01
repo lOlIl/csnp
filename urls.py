@@ -4,6 +4,9 @@ from django.views.generic.simple import direct_to_template
 
 from myPasteBin import views
 
+import django_cron
+django_cron.autodiscover()
+
 urlpatterns = patterns('',
     (r'^$',                     direct_to_template, {'template': 'index.html'}),  
     (r'^paste/new/$',           views.create_paste),
