@@ -96,6 +96,7 @@ function saveForm(){
                 switch(result){
                 case 1:
                     Ext.MessageBox.alert('OK','New paste added.');
+                    dataStore.load();
                     break;
                 default:
                     Ext.MessageBox.alert('Bad','Could not create new paste.' + result);
@@ -124,9 +125,64 @@ function clearForm(show){
 	    Ext.Msg.alert('Success', 'Your form has been cleaned!.');
     }
 
+// DataStore
+function createDataStore(){
+    dataStore = new Ext.data.JsonStore({
+        url: 'paste/all/',
+        root: 'items',
+        fields: [
+                    'weblink', 
+		            'nickname',
+		            'exp_time',
+                    'pub_time',
+                    'title',
+                    'text' 
+                ], 
+        });
+
+    dataStore.load();
+    }
+// Grid
+function createGrid(){
+    grid = new Ext.grid.GridPanel({
+        store : dataStore,
+        columns: [
+                    {header: 'Published Time', width: 100, sortable: true,                dataIndex: 'pub_time'}, 
+                    {header: 'Expiration Time', width: 150, sortable: true, hidden:true,  dataIndex: 'exp_time'},
+                    {header: 'Author', width: 75, sortable: true, hidden:true,         dataIndex: 'nickname'},
+                    {header: 'Weblink', width: 150, sortable: true,                      dataIndex: 'weblink'},    
+                    {header: 'Title', width: 50, sortable: true,                         dataIndex: 'title'},
+               ],
+            
+        viewConfig: {
+            forceFit: true
+            },
+
+        renderTo: 'table',
+        title: 'All application posts',
+        width:750,
+        autoHeight: true,
+        frame:true,
+
+        tbar:[{
+                text:'Add Post',
+                tooltip:'Add a new post record',
+                iconCls:'add',  
+                listeners:{'click':function(){ post_window.show(); }}
+               },
+                
+                ],
+        });
+}
+
 Ext.onReady(function() {
 
     createAppForm();
+    createDataStore();
+
     post_window.show();
+
+    createGrid();
+
 
 });
