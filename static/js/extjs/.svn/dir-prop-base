@@ -1,0 +1,7 @@
+K 13
+svn:externals
+V 152
+adapter -r38 http://extjs-public.googlecode.com/svn/trunk/release/adapter
+resources -r38 http://extjs-public.googlecode.com/svn/trunk/release/resources
+
+END
