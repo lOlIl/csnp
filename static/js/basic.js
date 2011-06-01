@@ -176,7 +176,11 @@ function createGrid(){
         width:750,
         autoHeight: true,
         frame:true,
-
+       /*
+        listeners:{'dblclick':function(){ 
+                    Ext.Msg.alert('detail!.');
+                    }
+            },*/
         tbar:[{
                 text:'Add Post',
                 tooltip:'Add a new post record',
@@ -238,6 +242,40 @@ function createGrid(){
         });
 }
 
+// simple paste detail into panel
+function createPasteDetail(){
+    
+    bookTplMarkup = [
+        '<div>Title: {title}</div>',
+        '<div>by author: {nickname} published: {pub_time} expires: {exp_time} </div><br/>',
+        '<div>Text:</div> {text}'
+        ];
+    bookTpl = new Ext.Template(bookTplMarkup);
+
+    detailWindow = new Ext.Panel({
+        id: 'detail',
+        title:'Detail of Paste',
+        width: 750,
+        
+        plain:true,
+        layout: 'fit',      
+        closable:true,
+        closeAction:'hide',
+        renderTo: 'detail',
+        items:[{
+            id: 'detailPanel',
+            region: 'center',
+            autoHeight:true,
+            bodyStyle: {
+                background: '#ffffff',
+                padding: '7px'
+            },
+            html: 'Choose a weblink to be shown.'           
+            }] 
+        });
+    detailWindow.hide();
+}
+
 Ext.onReady(function() {
 
     Ext.QuickTips.init();
@@ -248,6 +286,16 @@ Ext.onReady(function() {
     post_window.show();
 
     createGrid();
+    createPasteDetail();
 
+    grid.getSelectionModel().on('rowselect', function(sm, rowIdx, r) {
+        var detailPanel = Ext.getCmp('detailPanel');
+        var rec = grid.getStore().getAt(rowIdx);
+ 
+        bookTpl.overwrite(detailPanel.body, rec.data);
+        detailWindow.show();
+        });
+
+    
 
 });

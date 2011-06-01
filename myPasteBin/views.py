@@ -15,7 +15,7 @@ def _json_datetime(d):
     return d.strftime("%d-%m-%Y %H:%M")
 
 def _json_link(l):
-    return '/posts/'+l
+    return '/paste/detail/'+l
 
 def json_list(valueset):
     data = [dict(v, **{'weblink':_json_link(v['weblink']),'pub_time':_json_datetime(v['pub_time']),'exp_time': _json_datetime(v['exp_time'])}) for v in valueset] 
@@ -31,16 +31,16 @@ def find_pastes(request):
         # search style 3 in 1   
         NOW = datetime.now()  
         if request.GET.has_key('title'):
-            valueset =  Paste.objects.filter(Q(title = toFind),Q(exp_time__gt=NOW)).values('weblink', 'nickname', 'exp_time','pub_time','title')
+            valueset =  Paste.objects.filter(Q(title = toFind),Q(exp_time__gt=NOW)).values()
         elif request.GET.has_key('author'):
-            valueset =  Paste.objects.filter(Q(nickname = toFind),Q(exp_time__gt=NOW)).values('weblink', 'nickname', 'exp_time','pub_time','title')
+            valueset =  Paste.objects.filter(Q(nickname = toFind),Q(exp_time__gt=NOW)).values()
         else:      
-            valueset =  Paste.objects.filter(Q(nickname = toFind)|Q(title = toFind),Q(exp_time__gt=NOW)).values('weblink', 'nickname', 'exp_time','pub_time','title')
+            valueset =  Paste.objects.filter(Q(nickname = toFind)|Q(title = toFind),Q(exp_time__gt=NOW)).values()
         return HttpResponse(json_list(valueset), mimetype='text/javascript') 
     return HttpResponseServerError(error_msg) 
 
 def all_pastes(request):
-    valueset = Paste.objects.values('weblink', 'nickname', 'exp_time','pub_time','title')
+    valueset = Paste.objects.values()
     return HttpResponse(json_list(valueset), mimetype='text/javascript')
 
 def create_paste(request):
