@@ -142,6 +142,19 @@ function createDataStore(){
 
     dataStore.load();
     }
+
+// create the url to load the data from 
+// default search by both
+function searchBy(what,title,author){
+    url = 'paste/search/?find='+what;
+    if (title)  
+        url += '&title=true';
+    else if (author)
+        url += '&author=true';
+    dataStore.proxy.conn.url = url;
+    dataStore.load();                  
+    }
+
 // Grid
 function createGrid(){
     grid = new Ext.grid.GridPanel({
@@ -149,7 +162,7 @@ function createGrid(){
         columns: [
                     {header: 'Published Time', width: 100, sortable: true,                dataIndex: 'pub_time'}, 
                     {header: 'Expiration Time', width: 150, sortable: true, hidden:true,  dataIndex: 'exp_time'},
-                    {header: 'Author', width: 75, sortable: true, hidden:true,         dataIndex: 'nickname'},
+                    {header: 'Author', width: 75, sortable: true, hidden:true,          dataIndex: 'nickname'},
                     {header: 'Weblink', width: 150, sortable: true,                      dataIndex: 'weblink'},    
                     {header: 'Title', width: 50, sortable: true,                         dataIndex: 'title'},
                ],
@@ -159,7 +172,7 @@ function createGrid(){
             },
 
         renderTo: 'table',
-        title: 'All application posts',
+        title: 'All application pastes',
         width:750,
         autoHeight: true,
         frame:true,
@@ -170,12 +183,64 @@ function createGrid(){
                 iconCls:'add',  
                 listeners:{'click':function(){ post_window.show(); }}
                },
+            new Ext.Toolbar.TextItem ("Search For:"),
+                    {
+                        xtype:'textfield',
+                        fieldLabel:'Search',
+                        width:75,
+                        name: 'pattern',
+                        id:'pattern',
+                    },
+                    {
+                        text:'By author',
+                        tooltip:'Search for pasters records by author',
+                        iconCls:'add',  
+                        listeners:{'click':function(){ 
+                            var text = Ext.get('pattern').getValue();
+                            if (text != '')
+                                searchBy(text, title=false, author=true);
+                            else Ext.Msg.alert('Search error', 'Empty search pattern!.');
+                            }}
+                    },
+                    {
+                        text:'By title',
+                        tooltip:'Search for pastes records by title',
+                        iconCls:'add',  
+                        listeners:{'click':function(){
+                            var text = Ext.get('pattern').getValue();
+                            if (text != '')
+                                searchBy(text, title=true, author=false );
+                            else Ext.Msg.alert('Search error', 'Empty search pattern!.'); 
+                            }}
+                    },
+                    {
+                        text:'By both',
+                        tooltip:'Search for pastes records by both - author OR title',
+                        iconCls:'add',  
+                        listeners:{'click':function(){
+                            var text = Ext.get('pattern').getValue();
+                            if (text != '')
+                                searchBy(text,title=false, author=false);
+                            else Ext.Msg.alert('Search error', 'Empty search pattern!.'); 
+                            }}
+                    },
+                    {
+                        text:'Refresh pastes',
+                        tooltip:'Show all post records in database',
+                        iconCls:'add',  
+                        listeners:{'click':function(){ 
+                            dataStore.proxy.conn.url = 'paste/all/';
+                            dataStore.load();               
+                            }}
+                    },
                 
                 ],
         });
 }
 
 Ext.onReady(function() {
+
+    Ext.QuickTips.init();
 
     createAppForm();
     createDataStore();

@@ -1,5 +1,6 @@
 from django.http import HttpRequest, HttpResponse, HttpResponseServerError
 from django.utils import simplejson
+from django.db.models import Q
 
 from datetime import datetime
 from string import letters,digits
@@ -22,6 +23,21 @@ def json_list(valueset):
     return json 
 
 ###
+
+def find_pastes(request):
+    error_msg = u"No data sent."
+    if request.method == "GET" and request.GET.has_key('find'):
+        toFind = request.GET['find']
+        # search style 3 in 1   
+        NOW = datetime.now()  
+        if request.GET.has_key('title'):
+            valueset =  Paste.objects.filter(Q(title = toFind),Q(exp_time__gt=NOW)).values('weblink', 'nickname', 'exp_time','pub_time','title')
+        elif request.GET.has_key('author'):
+            valueset =  Paste.objects.filter(Q(nickname = toFind),Q(exp_time__gt=NOW)).values('weblink', 'nickname', 'exp_time','pub_time','title')
+        else:      
+            valueset =  Paste.objects.filter(Q(nickname = toFind)|Q(title = toFind),Q(exp_time__gt=NOW)).values('weblink', 'nickname', 'exp_time','pub_time','title')
+        return HttpResponse(json_list(valueset), mimetype='text/javascript') 
+    return HttpResponseServerError(error_msg) 
 
 def all_pastes(request):
     valueset = Paste.objects.values('weblink', 'nickname', 'exp_time','pub_time','title')
