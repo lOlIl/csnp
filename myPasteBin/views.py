@@ -61,8 +61,8 @@ def create_paste(request):
             usr = get['nickname']
             exp = datetime.strptime(get['exp_time'],'%d/%m/%Y %H:%M')           
 
-            if Paste.objects.filter(title=ttl).count() > 0:
-                error_msg = u"Title already in use."
+            if len(txt) > 100000: # utf-8 100kB
+                error_msg = u"Your text is too long."
             else:
                 p = Paste(randString(15),usr,ttl,txt,exp)
                 p.save()
