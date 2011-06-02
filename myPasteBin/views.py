@@ -8,8 +8,13 @@ from random import choice
 
 from models import Paste
 
-def randString(len = 10):
-    return ''.join(choice(letters + digits) for x in range(len))
+def randString(length = 10):
+    original = False
+    while(not original):
+        original_link = ''.join(choice(letters + digits) for x in range(length))
+        if len(Paste.objects.filter(weblink = original_link)) == 0:
+            original = True    
+    return original_link
 
 def _json_datetime(d):
     return d.strftime("%d-%m-%Y %H:%M")
