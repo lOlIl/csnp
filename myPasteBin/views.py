@@ -59,14 +59,19 @@ def create_paste(request):
             ttl = get['title']
             txt = get['text']
             usr = get['nickname']
-            exp = datetime.strptime(get['exp_time'],'%d/%m/%Y %H:%M')           
+
+            try:
+                exp = datetime.strptime(get['exp_time'],'%d/%m/%Y %H:%M')           
+            except:
+                msg = 2
 
             if len(txt) > 100000: # utf-8 100kB
-                error_msg = u"Your text is too long."
+                msg = 0
             else:
                 p = Paste(randString(15),usr,ttl,txt,exp)
                 p.save()
-                return HttpResponse(str(1))
+                msg = 1
+            return HttpResponse(msg)
         else:
             error_msg = u"Insufficient data"
     return HttpResponseServerError(error_msg) 

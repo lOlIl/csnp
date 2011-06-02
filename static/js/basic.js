@@ -42,7 +42,9 @@ function createAppForm(){
         name: 'exp_time',
         width:100,
         increment  : 30,
-        format     : 'H:i'
+        format     : 'H:i',
+	    allowBlank:false,
+        msgTarget:'side'
         });
 
     // Form
@@ -99,12 +101,12 @@ function saveForm(){
                     dataStore.load();
                     break;
                 default:
-                    Ext.MessageBox.alert('Bad','Could not create new paste.' + result);
+                    Ext.MessageBox.alert('Bad','Could not create new paste. Text too long.');
                     break;
                     }
+                clearForm();             
                 post_window.hide();
-                clearForm(show=False);                
-
+                
                 },
             failure: function(response){
                 var result=response.responseText;
