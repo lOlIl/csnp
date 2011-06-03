@@ -137,12 +137,11 @@ function createDataStore(){
 		            'nickname',
 		            'exp_time',
                     'pub_time',
-                    'title',
-                    'text' 
+                    'title'
                 ], 
+        autoLoad: true
         });
 
-    dataStore.load();
     }
 
 // create the url to load the data from 
@@ -178,11 +177,6 @@ function createGrid(){
         width:750,
         autoHeight: true,
         frame:true,
-       /*
-        listeners:{'dblclick':function(){ 
-                    Ext.Msg.alert('detail!.');
-                    }
-            },*/
         tbar:[{
                 text:'Add Post',
                 tooltip:'Add a new post record',
@@ -248,17 +242,16 @@ function createGrid(){
 function createPasteDetail(){
     
     bookTplMarkup = [
-        '<div>Title: {title}</div>',
+        '<div>{title}</div><br/>',
         '<div>by author: {nickname} published: {pub_time} expires: {exp_time} </div><br/>',
-        '<div>Text:</div> {text}'
         ];
     bookTpl = new Ext.Template(bookTplMarkup);
 
+    // basic more detailed panel
     detailWindow = new Ext.Panel({
         id: 'detail',
-        title:'Detail of Paste',
         width: 750,
-        
+        title:'Paste basic overview',        
         plain:true,
         layout: 'fit',      
         closable:true,
@@ -273,9 +266,83 @@ function createPasteDetail(){
                 padding: '7px'
             },
             html: 'Choose a weblink to be shown.'           
-            }] 
+            }] ,
+        tbar: [{
+            // show more details of Paste
+            text: 'More details',
+            handler: function(){
+                    detailMoreWindow.show();
+                    }
+             
+                }]
         });
     detailWindow.hide();
+}
+
+// show full paste in a new window
+function createPasteMoreDetail(){
+
+    detailMoreTplMarkup = [
+        '<b>{title}</b><br>',
+        '<div>This paste by {nickname}<br/>',
+        'Published on: {pub_time}<br/>',
+        'Expiration time till: {exp_time} </div><br/>',
+        '<div>The text of Paste:</div><br>{text}'
+        ];
+
+    detailMoreTpl = new Ext.Template(detailMoreTplMarkup);
+
+    detailMorePanel = new Ext.FormPanel({
+        id: 'detail',
+        width: 750,
+        frame: true,
+        items:[{
+            id: 'myDetail',
+            region: 'center',
+            autoHeight:true,
+            bodyStyle: {
+                background: '#ffffff',
+                padding: '7px'
+            },
+            html: 'Choose a weblink to be shown.'           
+            }]
+        });
+
+    detailMoreWindow = new Ext.Window({
+        id: 'moreWindow',
+        title:'Detail of paste',
+        width: 500,
+        height: 430,
+        plain:true,
+        layout: 'fit',      
+        items: detailMorePanel,
+        closable:true,
+        closeAction:'hide', 
+        });
+
+        // store for only just one paste, the User selected
+    detailStore = new Ext.data.JsonStore({
+        root: 'items',
+        fields: ['weblink','nickname','exp_time','pub_time','title','text'],
+        url:'',
+        autoLoad: true
+        });
+    
+    // onload the data, refresh the template content
+    detailStore.on('load',function(dataStore,records,options) {
+    if (records.length > 0) {
+        var thisrec = detailStore.getAt(0);
+        var myRec = new Object();
+        myRec.title =     thisrec.get('title');
+        myRec.text =      thisrec.get('text');
+        myRec.nickname =  thisrec.get('nickname');
+        myRec.pub_time =  thisrec.get('pub_time');
+        myRec.exp_time =  thisrec.get('exp_time');
+
+        var dp = Ext.getCmp('myDetail');
+        detailMoreTpl.overwrite(dp.body, myRec);
+        }
+    },this);
 }
 
 Ext.onReady(function() {
@@ -289,15 +356,20 @@ Ext.onReady(function() {
 
     createGrid();
     createPasteDetail();
+    createPasteMoreDetail();
 
     grid.getSelectionModel().on('rowselect', function(sm, rowIdx, r) {
         var detailPanel = Ext.getCmp('detailPanel');
         var rec = grid.getStore().getAt(rowIdx);
- 
+
+        // ! important for more detailed show
+        recordUrl = rec.data.weblink;
+
+        detailStore.proxy.conn.url = recordUrl; 
+        detailStore.load();
+
         bookTpl.overwrite(detailPanel.body, rec.data);
         detailWindow.show();
+
         });
-
-    
-
 });

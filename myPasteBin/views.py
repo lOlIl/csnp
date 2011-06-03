@@ -1,6 +1,7 @@
 from django.http import HttpRequest, HttpResponse, HttpResponseServerError
 from django.utils import simplejson
 from django.db.models import Q
+from django.shortcuts import render_to_response
 
 from datetime import datetime
 from string import letters,digits
@@ -29,6 +30,10 @@ def json_list(valueset):
 
 ###
 
+def detail(request, weblink):
+    paste = Paste.objects.filter(weblink = weblink).values()
+    return HttpResponse(json_list(paste), mimetype='text/javascript') 
+    
 def check_exp_time():
     Paste.objects.filter(exp_time__lt = datetime.now()).delete()    
 
@@ -38,17 +43,17 @@ def find_pastes(request):
         toFind = request.GET['find']
         # search style 3 in 1   
         NOW = datetime.now()  
-        if request.GET.has_key('title'):
-            valueset =  Paste.objects.filter(Q(title = toFind),Q(exp_time__gt=NOW)).values()
-        elif request.GET.has_key('author'):
-            valueset =  Paste.objects.filter(Q(nickname = toFind),Q(exp_time__gt=NOW)).values()
+        if request.GET.has_key('title'):    # searching for title
+            valueset =  Paste.objects.filter(Q(title = toFind),Q(exp_time__gt=NOW)).values('weblink','title','pub_time','exp_time','nickname')
+        elif request.GET.has_key('author'): # searching for author
+            valueset =  Paste.objects.filter(Q(nickname = toFind),Q(exp_time__gt=NOW)).values('weblink','title','pub_time','exp_time','nickname')
         else:      
-            valueset =  Paste.objects.filter(Q(nickname = toFind)|Q(title = toFind),Q(exp_time__gt=NOW)).values()
+            valueset =  Paste.objects.filter(Q(nickname = toFind)|Q(title = toFind),Q(exp_time__gt=NOW)).values('weblink','title','pub_time','exp_time','nickname')
         return HttpResponse(json_list(valueset), mimetype='text/javascript') 
     return HttpResponseServerError(error_msg) 
 
 def all_pastes(request):
-    valueset = Paste.objects.values()
+    valueset = Paste.objects.values('weblink','title','pub_time','exp_time','nickname')
     return HttpResponse(json_list(valueset), mimetype='text/javascript')
 
 def create_paste(request):
